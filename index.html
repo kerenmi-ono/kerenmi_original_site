@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ONO SHIKKI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;300;500&family=Shippori+Mincho:wght@400;700&swap" rel="stylesheet">
+    <style>
+       #opening-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            min-height: 100vh;
+            background-color: #c2143d;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            z-index: 9999;
+            transition: opacity 1s ease-in-out;
+        }
+
+        #opening-splash img {
+            position: relative;
+            width: auto;
+            height: auto;
+            max-width: 16.875vw;
+            max-height: 16.875vh;
+            object-fit: contain;
+            object-position: center;
+            display: block;
+            border: none;
+            background-color: transparent;
+            margin: 0;
+            padding: 0;
+        }
+
+        #opening-splash.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #opening-splash.hidden {
+            display: none;
+        }
+
+       :root {
+            --bg-color: #fcfbf9; 
+            --text-color: #1a1a1a;
+            --accent-color: #a68b5a; 
+            --border-color: #e5e0d8;
+            --brand-red: #b31b34; 
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Shippori Mincho', 'Noto Serif JP', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 2.2;
+            letter-spacing: 0.05em;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            pointer-events: none;
+        }
+
+        body.is-ready {
+            overflow-y: auto;
+            pointer-events: auto;
+        }
+
+        /* --- Header --- */
+        header {
+            position: fixed;
+            top: 40px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 0 60px;
+            z-index: 1000;
+            pointer-events: none;
+            transition: all 0.5s ease;
+        }
+
+        header.scrolled {
+            top: 20px;
+        }
+
+        .header-logo-area {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-logo-area img {
+            height: 48px;
+            width: auto;
+            transition: filter 0.5s ease, height 0.5s ease;
+            filter: brightness(0) invert(1);
+        }
+
+        header.scrolled .header-logo-area img {
+            filter: brightness(0);
+            height: 40px;
+        }
+
+        .header-subtitle-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-family: 'Noto Serif JP', serif;
+            font-size: 16px;
+            letter-spacing: 0.5em;
+            color: white;
+            margin-top: 30px;
+            font-weight: 200;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.8s ease;
+        }
+
+        header.scrolled .header-subtitle-vertical {
+            opacity: 0 !important; 
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+            align-items: center;
+            margin-top: 5px;
+        }
+
+        .nav-item-box {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 18px;
+            border-radius: 40px;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item-box a {
+            font-size: 10px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 400;
+            line-height: 1;
+        }
+
+        header.scrolled .nav-item-box {
+            background: rgba(26, 26, 26, 0.9);
+            border-color: var(--accent-color);
+            border-radius: 8px;
+            padding: 6px 18px;
+        }
+
+        header.scrolled .nav-item-box a {
+            color: white;
+        }
+
+        /* --- Hero Section --- */
+        .scrolling-wrapper {
+            position: relative;
+            height: 380vh;
+        }
+
+        .sticky-container {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .scroll-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.2s ease-in-out, visibility 1.2s;
+            color:#000000;
+        }
+
+        .scroll-section.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            filter: none;
+        }
+
+        .overlay-content {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-brand h1 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 200;
+            letter-spacing: 0.35em;
+            line-height: 1.2;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1.2s ease-out 0.3s;
+        }
+
+        #section-1.active .hero-brand h1,　{
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .hero-copy-vertical {
+            position: absolute;
+            right: 8%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 20;
+            writing-mode: vertical-rl;
+            font-size: 18px;
+            letter-spacing: 0.65em;
+            font-weight: 300;
+            color: rgb(255, 249, 249);
+            opacity: 0;
+            transition: opacity 1.2s ease-out 0.6s, transform 1.2s ease-out 0.6s, color 0.8s ease;
+            white-space: nowrap;
+            will-change: opacity, transform;
+        }
+
+        /* 2枚目：TRADITION のコピーとタイトルを黒に変更 */
+        
+        #section-2.active .hero-brand h1,
+        #section-2.active .hero-copy-vertical {
+            color: #000000 !important;
+        }
+
+        /* 3枚目：白のまま */
+        #section-3 .hero-copy-vertical {
+            color: #ffffff; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2); 
+        }
+
+        .scroll-section.active .hero-copy-vertical {
+            opacity: 1;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            letter-spacing: 0.5em;
+            text-transform: uppercase;
+            color: white;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0) translateX(-50%);}
+            40% {transform: translateY(-10px) translateX(-50%);}
+            60% {transform: translateY(-5px) translateX(-50%);}
+        }
+
+        /* --- Content Sections --- */
+        .content-section {
+            padding: 120px 0;
+            background-color: var(--bg-color);
+            position: relative;
+            z-index: 100;
+            box-shadow: 0 -20px 40px rgba(0,0,0,0.05);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .section-header {
+            margin-bottom: 60px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .section-label {
+            font-size: 10px;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .works-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .work-item {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16/10;
+            background: #f0f0f0;
+            cursor: zoom-in;
+        }
+
+        .work-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .work-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .work-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            color: white;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+            pointer-events: none;
+        }
+
+        .work-item:hover .work-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .work-category {
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .work-name {
+            font-size: 18px;
+            font-weight: 300;
+        }
+
+        /* --- Lightbox --- */
+        #lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%; 
+            object-fit: contain;
+            transform: scale(0.9);
+            transition: transform 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        #lightbox.active img {
+            transform: scale(1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            z-index: 2100;
+        }
+
+        /* --- Concept & Artisan & Footer --- */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .concept-text h2 {
+            font-size: 32px;
+            line-height: 1.5;
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+
+        .img-box {
+            aspect-ratio: 4/5;
+            overflow: hidden;
+            background: #eee;
+        }
+
+        .img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .artisan-section {
+            background-color: #111;
+            color: white;
+            padding: 120px 0;
+            z-index: 100;
+            position: relative;
+        }
+
+        .artisan-grid {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .profile-photo-box {
+            width: 100%;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            filter: grayscale(1);
+            transition: filter 0.8s ease;
+        }
+
+        .profile-photo-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .artisan-info h3 {
+            font-size: 28px;
+            font-weight: 400;
+            margin-bottom: 20px;
+            letter-spacing: 0.2em;
+        }
+
+        .artisan-info p {
+            font-size: 15px;
+            color: #ccc;
+            max-width: 600px;
+        }
+
+        footer {
+            padding: 100px 0 60px;
+            text-align: center;
+            background: var(--bg-color);
+            position: relative;
+            z-index: 100;
+        }
+
+        .footer-logo img {
+            height: 50px;
+            margin-bottom: 40px;
+            filter: brightness(0);
+            opacity: 0.8;
+        }
+
+        .footer-catchcopy {
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        .footer-catchcopy span {
+            display: inline-block;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 14px;
+            letter-spacing: 0.18em;
+            line-height: 1.9;
+            color: rgba(26, 26, 26, 0.9);
+            font-weight: 300;
+        }
+
+        .footer-contact {
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .email-link {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            transition: color 0.3s ease;
+        }
+
+        .email-link:hover {
+            color: var(--brand-red);
+        }
+
+        /* Instagramアイコンのホバーアニメーション */
+        .instagram-icon-link {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            color: var(--text-color);
+            background-color: transparent;
+        }
+
+        .instagram-icon-link svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .instagram-icon-link:hover {
+            background-color: var(--text-color);
+            color: #fff;
+            border-color: var(--text-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .instagram-icon-link:hover svg {
+            transform: scale(1.1);
+        }
+
+        .copyright {
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 0 20px; }
+            .hero-copy-vertical { 
+                right: 5%; 
+                font-size: 14px;
+            }
+            .header-subtitle-vertical { display: none; }
+            .concept-grid, .artisan-grid, .works-grid { grid-template-columns: 1fr; }
+            .hero-brand h1 { font-size: clamp(2rem, 10vw, 3.5rem); }
+        }
+    </style>
+</head>
+<body>
+    <div id="opening-splash">
+        <img src="onoshikki_mark.png" alt="オープニング画像"> 
+    </div>
+
+    <div id="lightbox">
+        <div class="lightbox-close">&times;</div>
+        <img src="" alt="拡大画像">
+    </div>
+
+    <header id="main-header">
+        <div class="header-logo-area">
+            <img src="onoshikki_rogo.png" alt="小野漆器" id="header-logo">
+            <div id="header-subtitle" class="header-subtitle-vertical"></div>
+        </div>
+        <nav class="header-nav">
+            <div class="nav-item-box"><a href="#concept">Concept</a></div>
+            <div class="nav-item-box"><a href="#works">Works</a></div>
+            <div class="nav-item-box"><a href="#about">About</a></div>
+        </nav>
+    </header>
+
+    <div class="scrolling-wrapper" id="hero-wrapper">
+        <div class="sticky-container">
+            <section class="scroll-section active" id="section-1" data-subtitle="">
+                <img src="sara2.png" alt="漆器 1" class="scroll-bg main-visual">
+                <div class="overlay-content">
+                    <div class="hero-brand">
+                        <h1>ONO SHIKKI</h1>
+                    </div>
+                </div>
+                <div class="hero-copy-vertical">深きつやめきはあなたを飾る</div>
+                <div class="scroll-indicator">Scroll</div>
+            </section>
+
+            <section class="scroll-section" id="section-2" data-subtitle="TRADITION">
+                <img src="wan.jpg" alt="漆器 2" class="scroll-bg main-visual">
+                <div class="overlay-content">
+                    <div class="hero-brand">
+                        <h1>TRADITION</h1>
+                    </div>
+                </div>
+                <div class="hero-copy-vertical">受け継がれる、確かな技</div>
+            </section>
+
+            <section class="scroll-section" id="section-3" data-subtitle="INNOVATION">
+                <img src="tokei.jpg" alt="漆器 3" class="scroll-bg main-visual">
+                <div class="overlay-content">
+                    <div class="hero-brand">
+                        <h1>INNOVATION</h1>
+                    </div>
+                </div>
+                <div class="hero-copy-vertical">デジタルと工芸の融合</div>
+            </section>
+        </div>
+    </div>
+
+    <section id="concept" class="content-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Philosophy</span>
+                <h2 class="section-title">漆の哲学</h2>
+            </div>
+            <div class="concept-grid">
+                <div class="concept-text">
+                    <h2>伝統と現代、<br>相反するものを繋ぐ。</h2>
+                    <p>漆は数千年の時間を呼吸してきた「古典」であり、デジタルテクノロジーは無限の進化を続ける「現代」です。一見すると遠くかけ離れた、この二つの相反する概念を掛け合わせることで、これまでになかった新しい工芸の地平を切り拓きます。</p>
+                </div>
+                <div class="img-box">
+                    <img src="ita.png" alt="漆の板">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="works" class="content-section" style="padding-top: 50px;">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-label">Gallery</span>
+                <h2 class="section-title">作品紹介</h2>
+            </div>
+            <div class="works-grid">
+                <div class="work-item"><img src="sara.jpg" alt="作品1"><div class="work-info"><span class="work-category">Plate</span><h3 class="work-name">瓢箪皿</h3></div></div>
+                <div class="work-item"><img src="wan.jpg" alt="作品2"><div class="work-info"><span class="work-category">Bowl</span><h3 class="work-name">芋名月椀</h3></div></div>
+                <div class="work-item"><img src="tokei.jpg" alt="作品3"><div class="work-info"><span class="work-category">Clock</span><h3 class="work-name">漆時計(Retro.)</h3></div></div>
+                <div class="work-item"><img src="ita.png" alt="作品4"><div class="work-info"><span class="work-category">Base</span><h3 class="work-name">布目手板</h3></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="artisan-section">
+        <div class="container">
+            <div class="section-header" style="border-color: rgba(255,255,255,0.1);">
+                <span class="section-label">Artisan</span>
+                <h2 class="section-title">作り手について</h2>
+            </div>
+            <div class="artisan-grid">
+                <div class="profile-photo-box"><img src="オノソウ.png" alt="小野 素生"></div>
+                <div class="artisan-info">
+                    <h3>小野 素生 <span style="font-size: 14px; color: var(--accent-color); vertical-align: middle; margin-left: 10px;">ONO SOU</span></h3>
+                    <p>2006年生まれ。東北芸術工科大学工芸デザイン学科にて漆芸を専攻。伝統的な漆の技法と、3Dモデリングによる設計を組み合わせた表現を追求中。デジタル×工芸の融合がテーマ。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p class="footer-catchcopy">
+                <span>あなたを飾る</span>
+                <span>深きつやめきは</span>
+                <span>気品のみ</span>
+                <span>そこにあるのは</span>
+                <span>色はなく</span>
+            </p>
+            <div class="footer-logo"><img src="onoshikki_rogo.png" alt="ロゴ"></div>
+            <div class="footer-contact">
+                <a href="mailto:onoshikki.craftsanddesign@gmail.com" class="email-link">onoshikki.craftsanddesign@gmail.com</a>
+                <a href="https://www.instagram.com/0n0s0_/" target="_blank" class="instagram-icon-link" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.332 3.608 1.308.975.975 1.246 2.242 1.308 3.607.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.332 2.633-1.308 3.608-.975.975-2.242 1.246-3.607 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.332-3.608-1.308-.975-.975-1.246-2.242-1.308-3.607-.058-1.266-.07-1.646-.07-4.85s.012-3.584.07-4.85c.062-1.366.332-2.633 1.308-3.608.975-.975 2.242-1.246 3.607-1.308 1.266-.058 1.646-.07 4.85-.07M12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.668-.072-4.948-.197-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                </a>
+            </div>
+            <p class="copyright">&copy; 2025 ONO SHIKKI.</p>
+        </div>
+    </footer>
+
+    <script>
+        const header = document.getElementById('main-header');
+        const subtitleElement = document.getElementById('header-subtitle');
+        const lightbox = document.getElementById('lightbox');
+        const splash = document.getElementById('opening-splash');
+        const lightboxImg = lightbox.querySelector('img');
+        const workItems = document.querySelectorAll('.work-item');
+        const sections = [
+            document.getElementById('section-1'),
+            document.getElementById('section-2'),
+            document.getElementById('section-3')
+        ];
+
+        const mainVisuals = document.querySelectorAll('.main-visual');
+        let loadedCount = 0;
+        const totalToLoad = mainVisuals.length;
+        
+        let isMinTimeElapsed = false;
+        setTimeout(() => {
+            isMinTimeElapsed = true;
+            checkIfReadyToStart();
+        }, 2000);
+
+        mainVisuals.forEach(img => {
+            if (img.complete) imageLoaded();
+            else img.addEventListener('load', imageLoaded);
+        });
+
+        function imageLoaded() {
+            loadedCount++;
+            if (loadedCount >= totalToLoad) checkIfReadyToStart();
+        }
+
+        function checkIfReadyToStart() {
+            if (isMinTimeElapsed && loadedCount >= totalToLoad) startSite();
+        }
+
+        function startSite() {
+            splash.classList.add('fade-out');
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                document.body.classList.add('is-ready');
+            }, 1000);
+        }
+
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const vh = window.innerHeight;
+            
+            if (scrollY > vh * 3.0) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            let activeIndex = 0;
+            if (scrollY >= vh * 1.6) activeIndex = 2;
+            else if (scrollY >= vh * 0.8) activeIndex = 1;
+            else activeIndex = 0;
+
+            sections.forEach((sec, index) => {
+                if (index === activeIndex) {
+                    sec.classList.add('active');
+                    const subtitle = sec.getAttribute('data-subtitle');
+                    if (subtitle) {
+                        subtitleElement.textContent = subtitle;
+                        subtitleElement.style.opacity = "1";
+                        subtitleElement.style.transform = "translateY(0)";
+                    } else {
+                        subtitleElement.style.opacity = "0";
+                        subtitleElement.style.transform = "translateY(-10px)";
+                    }
+                } else {
+                    sec.classList.remove('active');
+                }
+            });
+        });
+
+        workItems.forEach(item => {
+            item.addEventListener('click', () => {
+                lightboxImg.src = item.querySelector('img').src;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        lightbox.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+            if(document.body.classList.contains('is-ready')) document.body.style.overflow = '';
+        });
+    </script>
+</body>
+</html>
